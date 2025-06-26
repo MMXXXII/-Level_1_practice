@@ -1,36 +1,12 @@
-// app.js
-const express = require('express');
-const app = express();
-const PORT = 3000;
+require('dotenv').config(); // Загружаем переменные из .env
 
-// Middleware для JSON
-app.use(express.json());
+const TelegramBot = require('node-telegram-bot-api');
 
-// Роутинг
-app.get('/static', (req, res) => {
-  res.json({ header: 'Hello', body: 'Octagon NodeJS Test' });
-});
+const token = process.env.TELEGRAM_BOT_TOKEN; // Читаем токен из .env
 
-app.get('/dynamic', (req, res) => {
-  const { a, b, c } = req.query;
+const bot = new TelegramBot(token, { polling: true });
 
-  const numA = parseFloat(a);
-  const numB = parseFloat(b);
-  const numC = parseFloat(c);
-
-  if (isNaN(numA) || isNaN(numB) || isNaN(numC)) {
-    return res.status(400).json({ header: 'Error', message: 'Invalid numbers' });
-  }
-
-  const result = (numA * numB * numC) / 3;
-  res.json({ header: 'Calculated', body: result.toString() });
-});
-
-// Обработка 404
-app.use((req, res) => {
-  res.status(404).json({ header: 'Error', message: 'Not Found' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Привет, октагон!');
 });

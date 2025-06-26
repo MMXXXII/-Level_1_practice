@@ -1,35 +1,36 @@
-const http = require('http');
-const url = require('url');
+// app.js
+const express = require('express');
+const app = express();
+const PORT = 3000;
 
-const server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-    const path = parsedUrl.pathname;
-    const query = parsedUrl.query;
+// Middleware для JSON
+app.use(express.json());
 
-    res.setHeader('Content-Type', 'application/json');
-
-    if (path === '/static') {
-        res.writeHead(200);
-        res.end(JSON.stringify({ header: 'Hello', body: 'Octagon NodeJS Test' }));
-    } else if (path === '/dynamic') {
-        const a = parseFloat(query.a);
-        const b = parseFloat(query.b);
-        const c = parseFloat(query.c);
-
-        if (isNaN(a) || isNaN(b) || isNaN(c)) {
-            res.writeHead(400);
-            res.end(JSON.stringify({ header: 'Error' }));
-        } else {
-            const result = (a * b * c) / 3;
-            res.writeHead(200);
-            res.end(JSON.stringify({ header: 'Calculated', body: result.toString() }));
-        }
-    } else {
-        res.writeHead(404);
-        res.end(JSON.stringify({ header: 'Error' }));
-    }
+// Роутинг
+app.get('/static', (req, res) => {
+  res.json({ header: 'Hello', body: 'Octagon NodeJS Test' });
 });
 
-server.listen(3000, () => {
-    console.log('Server running at http://localhost:3000/');
+app.get('/dynamic', (req, res) => {
+  const { a, b, c } = req.query;
+
+  const numA = parseFloat(a);
+  const numB = parseFloat(b);
+  const numC = parseFloat(c);
+
+  if (isNaN(numA) || isNaN(numB) || isNaN(numC)) {
+    return res.status(400).json({ header: 'Error', message: 'Invalid numbers' });
+  }
+
+  const result = (numA * numB * numC) / 3;
+  res.json({ header: 'Calculated', body: result.toString() });
+});
+
+// Обработка 404
+app.use((req, res) => {
+  res.status(404).json({ header: 'Error', message: 'Not Found' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}/`);
 });
